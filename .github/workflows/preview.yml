@@ -1,0 +1,49 @@
+
+name: Preview
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.1 # If you're using actions/checkout@v2 you must set persist-credentials to false in most cases for the deployment to work correctly.
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - name: Set up Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+        run: |
+          cd XCPCIO-Board
+          sed -i "s|baidu: ''|baidu: '${{ secrets.BAIDU_ANALYTICS_ID }}'|" config.ts 
+          sed -i "s|data_host: '/data/'|data_host: 'https://raw.githubusercontent.com/XCPCIO/XCPCIO-Board-Data/main/data/'|" config.ts
+          cat config.ts
+          yarn
+          yarn build
+          
+      - name: Minify HTML Index
+        uses: Dup4/minify-html-action@v9
+        with:
+          src: './XCPCIO-Board/dist/index.html'
+
+      - name: Enable 404.html
+        run: |
+          cp ./XCPCIO-Board/dist/index.html ./XCPCIO-Board/dist/404.html
+          
+      - name: Release
+        uses: JamesIves/github-pages-deploy-action@3.6.2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: XCPCIO-Board/dist # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch
