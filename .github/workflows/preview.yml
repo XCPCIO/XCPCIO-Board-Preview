@@ -26,7 +26,7 @@ jobs:
         run: |
           cd XCPCIO-Board
           sed -i "s|baidu: ''|baidu: '${{ secrets.BAIDU_ANALYTICS_ID }}'|" config.ts 
-          sed -i "s|data_host: '/data/'|data_host: 'https://raw.githubusercontent.com/XCPCIO/XCPCIO-Board-Data/main/data/'|" config.ts
+          sed -i "s|data_host: '/data/'|data_host: 'https://raw.githubusercontent.com/XCPCIO/XCPCIO-Board-Data/gh-pages/data/'|" config.ts
           cat config.ts
           yarn
           yarn build
